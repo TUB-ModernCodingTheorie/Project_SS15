@@ -39,9 +39,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
     if(nrhs!=2) {
         mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs","Two inputs required.");
     }
-    if(nlhs!=1) {
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nlhs","One output required.");
-    }
     /* make sure the first input argument is scalar */
     if( !mxIsDouble(prhs[0]) || 
          mxIsComplex(prhs[0]) ||
