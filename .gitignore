@@ -33,3 +33,7 @@
 
 # Debug files
 *.dSYM/
+
+# Tmp files
+
+bin/tmp/*
