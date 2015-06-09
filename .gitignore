@@ -1,6 +1,7 @@
 # MATLAB executables
 *.mexa64
 *.mexa32
+*.mexw64
 
 # Object files
 *.o
