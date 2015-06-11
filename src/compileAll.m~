@@ -6,6 +6,6 @@ outputPath = '../bin/private/';
 % compilation of all c-files
 
 for i = 3:length(srcFiles)
-    display(['Compiling ', srcFiles(i).name]);
+    display
     mex([inputPath srcFiles(i).name],'-outdir',outputPath);
 end
