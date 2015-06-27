@@ -1,7 +1,7 @@
 function [c, sN] = ccEncode(fwd, s0, seq)
-% HELLOWORLD  Print "hello" followed by the value of name
+% HELLOWORLD  Encode the sequence seq with the treliis fwd
 %
-% SYNOPSIS  helloWorld(name)
+% SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
 %
 % INPUTS    fwd = forward Trellis matrix
 %           s0  = initial state
