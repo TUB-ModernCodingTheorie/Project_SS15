@@ -1,12 +1,5 @@
 /* Include header files */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
 #include "mex.h"
 
 /* This yields the i-th binary digit of an integer (LSB is in position i = 0)*/
@@ -21,11 +14,11 @@ int BinEnc( int *state,
             int *x,
             const int info,
             const double ***fwd,
-            const int sizeM,
+            const int state_size,
             const int sizeK
         )
 {
-    if (*state >= sizeM || info >= sizeK)
+    if (*state >= state_size || info >= sizeK)
         return 0;
 	
     *x = fwd[*state][info][1];
