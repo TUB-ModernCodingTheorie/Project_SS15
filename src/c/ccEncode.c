@@ -10,7 +10,7 @@
 
 /* Encoder */
 
-void BinEnc( int *state,
+void BinEnc(int *state,
             int *codeWord,
             int info,
             int ***fwd
@@ -46,17 +46,17 @@ int FrameEncoder(int state)
 void ccEncode(mxArray *fwd, mxArray *s0, mxArray *seq, mxArray **c, mxArray **sN)
 {
     int i, rc = 0;
-	int codeWord = 0;
-	int currState = 0;
-	int stateSize = mxGetN(s0);
-	int frameSize = mxGetN(seq);
-	int outSize = 0;
+    int codeWord = 0;
+    int currState = 0;
+    int stateSize = mxGetN(s0);
+    int frameSize = mxGetN(seq);
+    int outSize = 0;
 
-	mxLogical *u = mxGetLogicals(seq);
+    mxLogical *u = mxGetLogicals(seq);
 
-	(*sN) = mxDuplicateArray(s0);
+    (*sN) = mxDuplicateArray(s0);
 
-	double *s0_ptr = mxGetPr(s0);
+    double *s0_ptr = mxGetPr(s0);
     for(i=0; i < stateSize; i++)
         currState ^= Bin2int((int)s0_ptr[i],i);
 
