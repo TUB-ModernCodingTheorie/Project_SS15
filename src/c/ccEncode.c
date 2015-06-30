@@ -10,21 +10,14 @@
 
 /* Encoder */
 
-int BinEnc( int *state,
-            int *x,
-            const int info,
-            const double ***fwd,
-            const int state_size,
-            const int sizeK
+void BinEnc( int *state,
+            int *codeWord,
+            int info,
+            int ***fwd
         )
 {
-    if (*state >= state_size || info >= sizeK)
-        return 0;
-	
-    *x = fwd[*state][info][1];
+    *codeWord = fwd[*state][info][1];
     *state = fwd[*state][info][0];
-
-    return 1;	
 }
 
 /* Frame encoder */
@@ -50,21 +43,25 @@ int FrameEncoder(int state)
 }
 */
 
-void ccEncode(const mxArray *fwd, const mxArray *s0, const mxArray *seq, mxArray *c, mxArray *sN)
+void ccEncode(mxArray *fwd, mxArray *s0, mxArray *seq, mxArray **c, mxArray **sN)
 {
-    int i, rc, x, s = 0;
-    double *s0_ptr = mxGetPr(s0);
-    double *seq_ptr = mxGetPr(seq);
+    int i, rc = 0;
+	int codeWord = 0;
+	int currState = 0;
+	int stateSize = mxGetN(s0);
+	int frameSize = mxGetN(seq);
+	int outSize = 0;
 
-    for(i=0; i < mxGetN(s0); i++)
-        s ^= Bin2int(s0_ptr[i]==1,i);
+	mxLogical *u = mxGetLogicals(seq);
 
-    for(i=0; i < mxGetN(seq); i++) {
-            rc = BinEnc(&s, &x, seq_ptr[i], mxGetPr(fwd), mxGetN(fwd), mxGetM(fwd));
-            if(!rc) {
-                mexErrMsgIdAndTxt("MyToolbox:ccEncode:encodeError","An encode error occured.");
-                return;
-        }
+	(*sN) = mxDuplicateArray(s0);
+
+	double *s0_ptr = mxGetPr(s0);
+    for(i=0; i < stateSize; i++)
+        currState ^= Bin2int((int)s0_ptr[i],i);
+
+    for(i=0; i < frameSize; i++) {
+         BinEnc(&currState, &codeWord, u[i], (uint64*)mxGetData(fwd));
     }
 }
 
@@ -84,14 +81,14 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
     
     /* make sure the first input argument is a string */
-    if( !mxIsDouble(prhs[0]) ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be a double.");
+    if( !mxIsClass(prhs[0], "uint64") ){
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be uint64.");
     }
-	if( !mxIsDouble(prhs[1]) ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be a double.");
+	if( !mxIsClass(prhs[1], "logical") ){
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be logical.");
     }
-	if( !mxIsDouble(prhs[2]) ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be a double.");
+	if( !mxIsClass(prhs[2], "logical") ){
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be logical.");
     }
 
     if( mxGetNumberOfDimensions(prhs[0]) != 3){
@@ -104,7 +101,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notRowVector","Input must be a row vector.");
     }
 
-    ccEncode(prhs[0], prhs[1], prhs[2], c, sN);
+    ccEncode(prhs[0], prhs[1], prhs[2], &c, &sN);
 
     plhs[0] = c;
     plhs[1] = sN;
