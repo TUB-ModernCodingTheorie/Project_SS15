@@ -10,10 +10,10 @@
 
 /* Encoder */
 
-void BinEnc( int *state,
-            int *codeWord,
-            int info,
-            int ***fwd
+void BinEnc( uint64_T *state,
+            uint64_T *codeWord,
+            uint64_T info,
+            uint64_T ***fwd
         )
 {
     *codeWord = fwd[*state][info][1];
@@ -46,22 +46,29 @@ int FrameEncoder(int state)
 void ccEncode(mxArray *fwd, mxArray *s0, mxArray *seq, mxArray **c, mxArray **sN)
 {
     int i, rc = 0;
-	int codeWord = 0;
-	int currState = 0;
+	uint64_T currState = 0;
 	int stateSize = mxGetN(s0);
 	int frameSize = mxGetN(seq);
-	int outSize = 0;
-
-	mxLogical *u = mxGetLogicals(seq);
+	uint64_T *cData;
+	uint64_T *uData;
+	uint64_T *fwdTrellis;
+	double *s0_ptr;
 
 	(*sN) = mxDuplicateArray(s0);
+	(*c) = mxCreateNumericMatrix(1, frameSize, mxUINT64_CLASS, 0);
 
-	double *s0_ptr = mxGetPr(s0);
+	
+	cData = (uint64_T*)mxGetData(*c);
+	uData = (uint64_T*)mxGetData(seq);
+	fwdTrellis = (uint64_T*)mxGetData(fwd);
+
+	s0_ptr = mxGetPr(s0);
     for(i=0; i < stateSize; i++)
         currState ^= Bin2int((int)s0_ptr[i],i);
 
     for(i=0; i < frameSize; i++) {
-         BinEnc(&currState, &codeWord, u[i], (uint64*)mxGetData(fwd));
+		printf("state: %d data: %d\n",currState, uData[i]);
+        BinEnc(&currState, &cData[i], uData[i], fwdTrellis);
     }
 }
 
@@ -74,7 +81,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     /* check for proper number of arguments */
     if(nrhs!=3) {
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs","Three inputs required.");
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs","Four inputs required.");
     }
     if(nlhs!=2) {
         mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nlhs","Two outputs required.");
@@ -82,13 +89,13 @@ void mexFunction( int nlhs, mxArray *plhs[],
     
     /* make sure the first input argument is a string */
     if( !mxIsClass(prhs[0], "uint64") ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be uint64.");
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notUint64","Forward table must be uint64.");
     }
-	if( !mxIsClass(prhs[1], "logical") ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be logical.");
+	if( !mxIsClass(prhs[1], "double") ){
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Initial state must be double.");
     }
-	if( !mxIsClass(prhs[2], "logical") ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be logical.");
+	if( !mxIsClass(prhs[2], "uint64") ){
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notUint64","Input sequence must be uint64.");
     }
 
     if( mxGetNumberOfDimensions(prhs[0]) != 3){

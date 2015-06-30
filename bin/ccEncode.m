@@ -14,9 +14,9 @@ function [c, sN] = ccEncode(fwd, s0, seq)
 % More detailed help is in the <a href="matlab: help helloWorld>extended_help">extended help</a>.
 
 
-assert(isa(fwd,'double'), '1st argument should be of type double');
-assert(isa(s0,'double'), '2nd argument should be of type double');
-assert(isa(seq,'double'), '3rd argument should be of type double');
+% assert(isa(fwd,'double'), '1st argument should be of type double');
+% assert(isa(s0,'double'), '2nd argument should be of type double');
+% assert(isa(seq,'double'), '3rd argument should be of type double');
 assert((exist('private/ccEncode.mexa64', 'file') > 0) || ...    
         (exist('private/ccEncode.mexw64', 'file') > 0) || ... 
         (exist('private/ccEncode.mexw32', 'file') > 0) || ... 
