@@ -1,4 +1,4 @@
-function [c, sN] = ccEncode(fwd, s0, seq)
+function [c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize)
 % HELLOWORLD  Encode the sequence seq with the treliis fwd
 %
 % SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
@@ -6,6 +6,8 @@ function [c, sN] = ccEncode(fwd, s0, seq)
 % INPUTS    fwd = forward Trellis matrix
 %           s0  = initial state
 %           seq = input sequence
+%			inputSize = number of input bits
+%			outputSize = number of outputBits
 %
 % OUTPUTS   c  = codewords
 %           sN = final state
@@ -23,7 +25,7 @@ assert((exist('private/ccEncode.mexa64', 'file') > 0) || ...
         exist('private/ccEncode.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder. You can use: ''cd private'' then ''mex ccEncode.c''');
 
-[c, sN] = ccEncode(fwd, s0, seq);
+[c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples
