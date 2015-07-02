@@ -2,129 +2,131 @@
 
 #define INFINITY     1.e10
 
-/* Decoder */
-int ccDecode(int **prior,
-                  int ***backward,
-                  int init_state,
-                  int final_state,
-                  const int Memory,
-                  const int Kbit,
-                  const int Mbit,
-                  const int Nbit,
-                  const int frame_length
-                )
+/**
+ * Viterbi Decoder
+ * 
+ * @param *seq input encoded sequence
+ * @param *bwd backward with
+ *          bwd[current_state][idx][0] = previous_state
+ *          bwd[current_state][idx][1] = input uncoded/plain bit
+ *          bwd[current_state][idx][2] = output bit
+ * @param initState state at which we begin
+ * @param finalState state in which we are supposed to finish with
+ * @param *decodedSeq decoded sequence output
+ * 
+ */
+void ccDecode(mxArray *encodedFrameArray, mxArray *bwdArray, int initState, int finalState, mxArray *decodedFrameArray, mxArray *codedBitsArray)
 {
-    if (Nbit % Mbit != 0) {
-        printf("ERROR: Nbit is not a multiple of Mbit\n");
-        exit(0);
-    } 
+    uint64_T *encodedFrame = (uint64_T*) mxGetData(encodedFrameArray);
+    uint64_T *decodedFrame = (uint64_T*) mxGetData(decodedFrameArray);
+    uint64_T *codedBits = (uint64_T*) mxGetData(codedBitsArray);
+    uint64_T ***bwd = (uint64_T***) mxGetData(bwdArray);
+
+    int stateSize = mxGetM(bwdArray);    /* Number of possible states: */
+    int inputSize = mxGetN(bwdArray);    /* Number of bits per symbol  */
+    int frameLength = mxGetN(encodedFrameArray)/*/??*/;  /* Number of unencoded input symbols per frame (ie: information bits) */
     
-    int asize,
-        sdim,
-        input_size,     /* */
-        state_size,     /* Number of state elements */
-        state,          /* index for the states */
+    int state,          /* index for the states */
         old_state,      /* index of a statets */
         t,x,i,i0,jj,d,
         survstate,      /* */
         survinput,
         survoutput,
-        b,
-        mask;
-        
+        bit;
+    
     double path,max,maxmax;
    
-    double *path0 = calloc(state_size, sizeof(double));
-    double *path1 = calloc(state_size, sizeof(double));
-    int *detected_info_frame  = calloc(frame_length,sizeof(int));
-    int *detected_code_frame  = calloc(frame_length,sizeof(int));
-    int ***trace_back = calloc(state_size,sizeof(*trace_back));
+    double *path0 = calloc(stateSize, sizeof(double));
+    double *path1 = calloc(stateSize, sizeof(double));
+    int *decoded_frame  = calloc(frameLength,sizeof(int));
+    int *detected_code_frame  = calloc(frameLength,sizeof(int));
+    int ***trace_back = calloc(stateSize,sizeof(*trace_back));
     
-    for (i = 0; i < state_size; ++i)
+    for (i = 0; i < stateSize; ++i)
     {
-        trace_back[i] = calloc(frame_length, sizeof(*trace_back[i]));
+        trace_back[i] = calloc(frameLength, sizeof(*trace_back[i]));
         if (trace_back[i] == NULL) {
             fprintf (stderr, "Memory allocation failure on trace_back");
         }
     }
     
-    state_size = (1 << Memory);
-    asize = (1 << Mbit);
-    input_size = (1 << Kbit);
-    
-    sdim = Nbit/Mbit;
-    
-    /* initialize all states */
-    for (state = 0 ; state < state_size ; state++)
+    /**
+     * 1. Initialization
+     * 
+     * All metrics are -infty exept the initial state
+     */
+    for (state = 0 ; state < stateSize ; state++)
         path0[state] = -INFINITY;
     
-    /* begin */
-    path0[init_state] = 0;
-
-    mask = asize - 1;
-	
-    for (t = 0 ; t < frame_length ; t++) {
-        maxmax = -INFINITY;
-        i0  = t*sdim;
-        
-        for(state = 0; state < state_size; state++) {
+    path0[initState] = 0;
+    
+    /**
+     * 2. ACS
+     *
+     * For each information bit of the frame
+     *  For each possible state transition
+     *   For each possible parent state
+     */
+    
+    for (t = frameLength-1 ; t >= 0 ; t--) {
+        for (state = 0 ; state < stateSize ; state++) {
             max = -INFINITY;
-            for( b = 0 ; b < input_size ; b++) {
-                x = backward[state][b][2];
-                old_state = backward[state][b][0];
+            for (bit = 0 ; bit < inputSize ; bit++) {
+                x = bwd[state][bit][2];
+                old_state = bwd[state][bit][0];
                 path = path0[old_state];
-                for (d = 0 ; d < sdim ; d++) {
-                    i = i0 + d;
-                    jj = (x >> d*Mbit)&mask;
-                    path += prior[i][jj];
-                }
-                if(path>=max) {
-                    survinput  = backward[state][b][1];
+                
+                if (path > max) {
+                    survinput = bwd[state][bit][1];
                     survoutput = x;
-                    survstate  = old_state;
                     max = path;
                 }
+                trace_back[state][t][0] = survstate;
+                trace_back[state][t][1] = survinput;
+                trace_back[state][t][2] = survoutput;
+                path1[state] = max;
+                
+                if (max >= maxmax)
+                    maxmax = max;
+                
+                for(state = 0 ; state < stateSize ; state++)
+                    path0[state] = path1[state] - maxmax;
             }
-            trace_back[state][t][0] = survstate;
-            trace_back[state][t][1] = survinput;
-            trace_back[state][t][2] = survoutput;
-            path1[state] = max;
-            
-            if (max >= maxmax)
-                maxmax = max;
         }
-        for(state = 0 ; state < state_size ; state++)
-            path0[state] = path1[state] - maxmax;
     }
-
+    
     /* Final trace back (with trellis termination) */
 
-    state = final_state;
-    for (t = frame_length-1 ; t >= 0 ; t--) {
-        detected_info_frame[t] = trace_back[state][t][1];
+    state = finalState;
+    for (t = frameLength-1 ; t >= 0 ; t--) {
+        decoded_frame[t] = trace_back[state][t][1];
         detected_code_frame[t] = trace_back[state][t][2];
         state = trace_back[state][t][0];
     }
     
-    free(path0);
+    if (state != initState) {
+        printf("- Error: trace-back does not recover initial state\n");
+        exit(0);
+    }
+    
+    /**
+     * Free pointers
+     */
+    
+  /*  free(path0);
     free(path1);
-    free(detected_info_frame);
-    free(detected_code_frame);
-    for (i = 0; i < state_size; ++i)
-    {
+    for (i = 0; i < stateSize; ++i) {
         free(trace_back[i]);
     }
-    free(trace_back);
-    
-    return(state);
+    free(trace_back);*/
 }
 
 /* The gateway function */
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
 {
-    mxArray *c;	        /* output codewords */
-    mxArray *sN;	/* final state */
+    mxArray *encodedFrame, *bwd, *decodedFrame, *codedBits;
+    int initState, finalState; 
 
     /* check for proper number of arguments */
     if(nrhs!=3) {
@@ -155,26 +157,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notRowVector","Input must be a row vector.");
     }
 
-    int **prior;
-    int ***backward;
-    int init_state;
-    int final_state;
-    const int Memory;
-    const int Kbit;
-    const int Mbit;
-    const int Nbit;
-    const int frame_length;
     
-    ccDecode(prior,
-                  backward,
-                  init_state,
-                  final_state,
-                  Memory,
-                  Kbit,
-                  Mbit,
-                  Nbit,
-                  frame_length
-                )
-
-    /* Define output */
+    
+    ccDecode(encodedFrame, bwd, initState, finalState, decodedFrame, codedBits);
 }
