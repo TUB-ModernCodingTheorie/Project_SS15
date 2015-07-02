@@ -7,6 +7,8 @@ outputPath = '../bin/private/';
 srcFiles = dir(inputPath);
 
 for i = 3:length(srcFiles)
-    display(['Compiling ', srcFiles(i).name]);
-    mex([inputPath srcFiles(i).name],'-outdir',outputPath);
+    if regexp(srcFiles(i).name, '\w*(\.c)$')
+        display(['Compiling ', srcFiles(i).name]);
+        mex([inputPath srcFiles(i).name],'-outdir',outputPath);
+    end
 end

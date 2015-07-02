@@ -46,23 +46,23 @@ int FrameEncoder(int state)
 void ccEncode(mxArray *fwd, mxArray *s0, mxArray *seq, mxArray **c, mxArray **sN)
 {
     int i, rc = 0;
-	uint64_T currState = 0;
-	int stateSize = mxGetN(s0);
-	int frameSize = mxGetN(seq);
-	uint64_T *cData;
-	uint64_T *uData;
-	uint64_T *fwdTrellis;
-	double *s0_ptr;
 
-	(*sN) = mxDuplicateArray(s0);
-	(*c) = mxCreateNumericMatrix(1, frameSize, mxUINT64_CLASS, 0);
+    uint64_T currState = 0;
+    int stateSize = mxGetN(s0);
+    int frameSize = mxGetN(seq);
+    uint64_T *cData;
+    uint64_T *uData;
+    uint64_T *fwdTrellis;
+    double *s0_ptr;
 
-	
-	cData = (uint64_T*)mxGetData(*c);
-	uData = (uint64_T*)mxGetData(seq);
-	fwdTrellis = (uint64_T*)mxGetData(fwd);
+    (*sN) = mxDuplicateArray(s0);
+    (*c) = mxCreateNumericMatrix(1, frameSize, mxUINT64_CLASS, 0);
 
-	s0_ptr = mxGetPr(s0);
+    cData = (uint64_T*)mxGetData(*c);
+    uData = (uint64_T*)mxGetData(seq);
+    fwdTrellis = (uint64_T*)mxGetData(fwd);
+
+    s0_ptr = mxGetPr(s0);
     for(i=0; i < stateSize; i++)
         currState ^= Bin2int((int)s0_ptr[i],i);
 
