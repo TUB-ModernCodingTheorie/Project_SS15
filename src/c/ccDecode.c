@@ -2,44 +2,42 @@
 
 #define INFINITY     1.e10
 
-/* Decoder */
-int ccDecode(int **prior,
-                  int ***backward,
-                  int init_state,
-                  int final_state,
-                  const int Memory,
-                  const int Kbit,
-                  const int Mbit,
-                  const int Nbit,
-                  const int frame_length
-                )
+
+/**
+ * Viterbi Decoder
+ * 
+ * @param *seqArray input encoded sequence
+ * @param *bwdArray backward with
+ *          bwd[current_state][idx][0] = previous_state
+ *          bwd[current_state][idx][1] = input uncoded/plain bit
+ *          bwd[current_state][idx][2] = output bit
+ * @param initState state at which we begin
+ * @param finalState state in which we are supposed to finish with
+ * @param *decodedSeqArray decoded sequence (output)
+ * @param *recodedBitsArray encoded sequence going with the decoded one (output)
+ * 
+ */
+void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const int initState, const int finalState, mxArray **decodedFrameArray, mxArray **recodedFrameArray)
 {
-    if (Nbit % Mbit != 0) {
-        printf("ERROR: Nbit is not a multiple of Mbit\n");
-        exit(0);
-    } 
+    const mwSize *dims;
+
+    dims = mxGetDimensions(bwdArray);
+
+    uint64_T *encodedFrame = (uint64_T*) mxGetData(encodedFrameArray);
+    uint64_T ***bwd = (uint64_T***) mxGetData(bwdArray);
     
-    int asize,
-        sdim,
-        input_size,     /* */
-        state_size,     /* Number of state elements */
-        state,          /* index for the states */
-        old_state,      /* index of a statets */
-        t,x,i,i0,jj,d,
-        survstate,      /* */
-        survinput,
-        survoutput,
-        b,
-        mask;
-        
-    double path,max,maxmax;
-   
-    double *path0 = calloc(state_size, sizeof(double));
-    double *path1 = calloc(state_size, sizeof(double));
-    int *detected_info_frame  = calloc(frame_length,sizeof(int));
-    int *detected_code_frame  = calloc(frame_length,sizeof(int));
-    int ***trace_back = calloc(state_size,sizeof(*trace_back));
+    int stateSize = dims[0];    /* Number of possible states: */
+    int inputSize = dims[1];    /* Number of bits per symbol  */
     
+    printf("\ninput: %d\nstate: %d\n", inputSize, stateSize);
+    int frameLength = (int) mxGetM(encodedFrameArray)/inputSize;  /* Number of unencoded input symbols per frame (ie: information bits) */
+
+
+    double *path0 = calloc(stateSize, sizeof(double));
+    double *path1 = calloc(stateSize, sizeof(double));
+    uint64_T *decodedFrame  = calloc(frameLength,sizeof(uint64_T));
+    uint64_T *recodedFrame  = calloc(frameLength,sizeof(uint64_T));
+    int ***trace_back = calloc(stateSize,sizeof(*trace_back));    
     for (i = 0; i < state_size; ++i)
     {
         trace_back[i] = calloc(frame_length, sizeof(*trace_back[i]));
@@ -47,27 +45,24 @@ int ccDecode(int **prior,
             fprintf (stderr, "Memory allocation failure on trace_back");
         }
     }
-    
-    state_size = (1 << Memory);
-    asize = (1 << Mbit);
-    input_size = (1 << Kbit);
-    
-    sdim = Nbit/Mbit;
-    
-    /* initialize all states */
-    for (state = 0 ; state < state_size ; state++)
-        path0[state] = -INFINITY;
-    
-    /* begin */
-    path0[init_state] = 0;
 
-    mask = asize - 1;
-	
-    for (t = 0 ; t < frame_length ; t++) {
-        maxmax = -INFINITY;
-        i0  = t*sdim;
-        
-        for(state = 0; state < state_size; state++) {
+    /**
+     * 1. Initialization
+     * 
+     * All metrics are -infty exept the initial state
+     */
+    for (state = 0 ; state < stateSize ; state++)
+        path0[state] = -INFINITY;
+
+    /**
+     * 2. ACS
+     *
+     * For each information bit of the frame
+     *  For each possible state transition
+     *   For each possible parent state
+     */
+    for (t = frameLength-1 ; t >= 0 ; t--) {
+        for (state = 0 ; state < stateSize ; state++) {
             max = -INFINITY;
             for( b = 0 ; b < input_size ; b++) {
                 x = backward[state][b][2];
@@ -98,13 +93,22 @@ int ccDecode(int **prior,
     }
 
     /* Final trace back (with trellis termination) */
-
-    state = final_state;
-    for (t = frame_length-1 ; t >= 0 ; t--) {
-        detected_info_frame[t] = trace_back[state][t][1];
-        detected_code_frame[t] = trace_back[state][t][2];
+/*
+    state = finalState;
+    for (t = frameLength-1 ; t >= 0 ; t--) {
+        decodedFrame[t] = trace_back[state][t][1];
+        recodedFrame[t] = trace_back[state][t][2];
         state = trace_back[state][t][0];
     }
+    
+    if (state != initState) {
+        printf("- Error: trace-back does not recover initial state\n");
+        exit(0);
+    }
+
+    /**
+     * Free pointers
+     */
     
     free(path0);
     free(path1);
@@ -115,66 +119,55 @@ int ccDecode(int **prior,
         free(trace_back[i]);
     }
     free(trace_back);
-    
-    return(state);
 }
 
 /* The gateway function */
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
 {
-    mxArray *c;	        /* output codewords */
-    mxArray *sN;	/* final state */
-
     /* check for proper number of arguments */
-    if(nrhs!=3) {
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs","Three inputs required.");
-    }
-    if(nlhs!=2) {
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nlhs","Two outputs required.");
+    if(nrhs!=4) {
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:nrhs","Four inputs required.");
     }
     
     /* make sure the first input argument is a string */
-    if( !mxIsDouble(prhs[0]) ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be a double.");
+    if( !mxIsClass(prhs[0], "uint64") ){
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:notUint64","Encoded frame must be uint64.");
     }
-	if( !mxIsDouble(prhs[1]) ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be a double.");
+	if( !mxIsClass(prhs[1], "uint64") ){
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:notUint64","Backward table must be uint64.");
     }
-	if( !mxIsDouble(prhs[2]) ){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notDouble","Input must be a double.");
+	if( !mxIsScalar(prhs[2]) ){
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:notScalar","Initial state must be an integer.");
     }
-
-    if( mxGetNumberOfDimensions(prhs[0]) != 3){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:dimensionMismatch","The forward table must have three dimensions.");
-    }
-    if( mxGetM(prhs[1]) != 1){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notRowVector","Input must be a row vector.");
-    }
-    if( mxGetM(prhs[2]) != 1){
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:notRowVector","Input must be a row vector.");
+        if( !mxIsScalar(prhs[3]) ){
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:notScalar","Final state must be an integer.");
     }
 
-    int **prior;
-    int ***backward;
-    int init_state;
-    int final_state;
-    const int Memory;
-    const int Kbit;
-    const int Mbit;
-    const int Nbit;
-    const int frame_length;
+    if( mxGetNumberOfDimensions(prhs[1]) != 3){
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:dimensionMismatch","The backward table must have three dimensions.");
+    }
+    if( mxGetM(prhs[0]) != 1){
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:notRowVector","Encoded frame must be a row vector.");
+    }
     
-    ccDecode(prior,
-                  backward,
-                  init_state,
-                  final_state,
-                  Memory,
-                  Kbit,
-                  Mbit,
-                  Nbit,
-                  frame_length
-                )
-
-    /* Define output */
+    /*mxArray *encodedFrame = prhs[0];*/
+    
+    /*mxArray *bwd = prhs[1];*/
+    
+    int initState = mxGetScalar(prhs[2]);
+    
+    int finalState = mxGetScalar(prhs[3]);
+    
+    mxArray *decodedFrame;  
+    mxArray *recodedFrame;
+    
+    printf("0");
+    ccDecode(prhs[0], prhs[1], initState, finalState, &decodedFrame, &recodedFrame);
+    printf("0");
+    
+    decodedFrame = mxCreateDoubleScalar(3);
+    plhs[0] = decodedFrame;
+    plhs[1] = decodedFrame;
+    printf("FIN");
 }

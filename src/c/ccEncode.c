@@ -93,7 +93,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     /* check for proper number of arguments */
     if(nrhs!=5) {
-        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs","Four inputs required.");
+        mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nrhs","Fiv inputs required.");
     }
     if(nlhs!=2) {
         mexErrMsgIdAndTxt("MyToolbox:arrayProduct:nlhs","Two outputs required.");

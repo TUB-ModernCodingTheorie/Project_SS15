@@ -1,13 +1,11 @@
-function [c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize)
-% HELLOWORLD  Encode the sequence seq with the treliis fwd
+function [fwd, bwd] = ccInitialize(A,B,C,D,m,n,k)
+% CCINITIALIZE  
 %
-% SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
+% SYNOPSIS  [fwd, bwd] = ccInitialize(A,B,C,D,m,n,k)
 %
 % INPUTS    fwd = forward Trellis matrix
 %           s0  = initial state
 %           seq = input sequence
-%			inputSize = number of input bits
-%			outputSize = number of outputBits
 %
 % OUTPUTS   c  = codewords
 %           sN = final state
@@ -19,13 +17,13 @@ function [c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize)
 % assert(isa(fwd,'double'), '1st argument should be of type double');
 % assert(isa(s0,'double'), '2nd argument should be of type double');
 % assert(isa(seq,'double'), '3rd argument should be of type double');
-assert((exist('private/ccEncode.mexa64', 'file') > 0) || ...    
-        (exist('private/ccEncode.mexw64', 'file') > 0) || ... 
-        (exist('private/ccEncode.mexw32', 'file') > 0) || ... 
-        exist('private/ccEncode.mexa32', 'file') > 0, ...
+assert((exist('private/ccInitialize.mexa64', 'file') > 0) || ...    
+        (exist('private/ccInitialize.mexw64', 'file') > 0) || ... 
+        (exist('private/ccInitialize.mexw32', 'file') > 0) || ... 
+        exist('private/ccInitialize.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize);
+[fwd, bwd] = ccInitialize(A,B,C,D,m,n,k);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples
