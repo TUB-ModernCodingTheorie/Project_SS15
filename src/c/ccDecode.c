@@ -17,7 +17,7 @@
  * @param *recodedBitsArray encoded sequence going with the decoded one (output)
  * 
  */
-void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, uin64_T initState, uin64_T finalState, mxArray **decodedFrameArray, mxArray **recodedFrameArray)
+void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, uint64_T initState, uint64_T finalState, mxArray **decodedFrameArray, mxArray **recodedFrameArray)
 {
     int max, maxmax, survoutput, survinput,survstate,old_state,mask,Mbit,i,i0,sdim,b,jj,d,x,t, state;
     double path, **prior ;
