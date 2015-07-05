@@ -94,10 +94,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
     B = mxGetPr(prhs[1]);
     C = mxGetPr(prhs[2]);
     D = mxGetPr(prhs[3]);
-	
-	m = mxGetM(prhs[0]);
-	n = mxGetN(prhs[2]);
-	k = mxGetM(prhs[1]);
+    
+    m = mxGetM(prhs[0]);
+    n = mxGetN(prhs[2]);
+    k = mxGetM(prhs[1]);
     
     makeTrellis(A, B, C, D, m, n, k, &fwdArray, &bwdArray);
     

@@ -172,3 +172,4 @@ void mexFunction( int nlhs, mxArray *plhs[],
     plhs[1] = decodedFrame;
     printf("FIN");
 }
+

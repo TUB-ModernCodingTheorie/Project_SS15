@@ -136,3 +136,4 @@ void mexFunction( int nlhs, mxArray *plhs[],
     plhs[0] = c;
     plhs[1] = sN;
 }
+
