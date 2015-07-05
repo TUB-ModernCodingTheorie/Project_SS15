@@ -18,7 +18,6 @@ void BinEnc( uint64_T *state,
 			mwSize fwdDim2
         )
 {
-	/*printf("state: %d data: %d | %d %d\n",*state, info,fwdDim1,fwdDim2);*/
     *codeWord = fwd[*state + info*fwdDim1 + 1*(fwdDim1*fwdDim2)];
     *state = fwd[*state + info*fwdDim1 + 0*(fwdDim1*fwdDim2)];
 }

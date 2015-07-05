@@ -1,4 +1,4 @@
-function [fwd, bwd] = ccInitialize(A,B,C,D,m,n,k)
+function [fwd, bwd] = ccInitialize(A,B,C,D)
 % CCINITIALIZE  
 %
 % SYNOPSIS  [fwd, bwd] = ccInitialize(A,B,C,D,m,n,k)
@@ -23,7 +23,7 @@ assert((exist('private/ccInitialize.mexa64', 'file') > 0) || ...
         exist('private/ccInitialize.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[fwd, bwd] = ccInitialize(A,B,C,D,m,n,k);
+[fwd, bwd] = ccInitialize(A,B,C,D);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples
