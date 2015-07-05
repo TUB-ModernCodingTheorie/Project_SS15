@@ -9,7 +9,7 @@
  #define Bin2int(x_,i_) ((x_) << (i_))
 
  
-void makeTrellis(const uint64_T *A, const uint64_T *B, const uint64_T *C, const uint64_T *D,
+void makeTrellis(const int *A, const int *B, const int *C, const int *D,
                  int m, int n, int k, uint64_T ***fwd, uint64_T ***bwd)
 {
 
@@ -107,7 +107,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     mxArray *fwdArray, *bwdArray;
     uint64_T ***fwd, ***bwd;
-    uint64_T *A, *B, *C, *D;
+    int *A, *B, *C, *D;
     int m,n,k;
     int i,j;
     
@@ -124,10 +124,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
      *                          3 6 9]
      **/
     
-    A = (uint64_T*) mxGetPr(prhs[0]);
-    B = (uint64_T*) mxGetPr(prhs[1]);
-    C = (uint64_T*) mxGetPr(prhs[2]);
-    D = (uint64_T*) mxGetPr(prhs[3]);
+    A = (int*) mxGetPr(prhs[0]);
+    B = (int*) mxGetPr(prhs[1]);
+    C = (int*) mxGetPr(prhs[2]);
+    D = (int*) mxGetPr(prhs[3]);
     
     m = mxGetScalar(prhs[4]);
     n = mxGetScalar(prhs[5]);

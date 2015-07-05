@@ -7,7 +7,7 @@
  * Viterbi Decoder
  * 
  * @param *seqArray input encoded sequence
- * @param *bwdArray backward with
+ * @param *bwdArray bwd with
  *          bwd[current_state][idx][0] = previous_state
  *          bwd[current_state][idx][1] = input uncoded/plain bit
  *          bwd[current_state][idx][2] = output bit
@@ -19,6 +19,9 @@
  */
 void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const int initState, const int finalState, mxArray **decodedFrameArray, mxArray **recodedFrameArray)
 {
+    int max, maxmax, survoutput, survinput,survstate,old_state,mask,Mbit,i,i0,sdim,b,jj,d,x,t, state;
+    double path, **prior ;
+    
     const mwSize *dims;
 
     dims = mxGetDimensions(bwdArray);
@@ -38,9 +41,9 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const i
     uint64_T *decodedFrame  = calloc(frameLength,sizeof(uint64_T));
     uint64_T *recodedFrame  = calloc(frameLength,sizeof(uint64_T));
     int ***trace_back = calloc(stateSize,sizeof(*trace_back));    
-    for (i = 0; i < state_size; ++i)
+    for (i = 0; i < stateSize; ++i)
     {
-        trace_back[i] = calloc(frame_length, sizeof(*trace_back[i]));
+        trace_back[i] = calloc(frameLength, sizeof(*trace_back[i]));
         if (trace_back[i] == NULL) {
             fprintf (stderr, "Memory allocation failure on trace_back");
         }
@@ -64,9 +67,9 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const i
     for (t = frameLength-1 ; t >= 0 ; t--) {
         for (state = 0 ; state < stateSize ; state++) {
             max = -INFINITY;
-            for( b = 0 ; b < input_size ; b++) {
-                x = backward[state][b][2];
-                old_state = backward[state][b][0];
+            for( b = 0 ; b < inputSize ; b++) {
+                x = bwd[state][b][2];
+                old_state = bwd[state][b][0];
                 path = path0[old_state];
                 for (d = 0 ; d < sdim ; d++) {
                     i = i0 + d;
@@ -74,7 +77,7 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const i
                     path += prior[i][jj];
                 }
                 if(path>=max) {
-                    survinput  = backward[state][b][1];
+                    survinput  = bwd[state][b][1];
                     survoutput = x;
                     survstate  = old_state;
                     max = path;
@@ -88,7 +91,7 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const i
             if (max >= maxmax)
                 maxmax = max;
         }
-        for(state = 0 ; state < state_size ; state++)
+        for(state = 0 ; state < stateSize ; state++)
             path0[state] = path1[state] - maxmax;
     }
 
@@ -110,11 +113,9 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, const i
      * Free pointers
      */
     
-    free(path0);
-    free(path1);
-    free(detected_info_frame);
-    free(detected_code_frame);
-    for (i = 0; i < state_size; ++i)
+    mxFree(path0);
+    mxFree(path1);
+    for (i = 0; i < stateSize; ++i)
     {
         free(trace_back[i]);
     }
@@ -145,7 +146,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
 
     if( mxGetNumberOfDimensions(prhs[1]) != 3){
-        mexErrMsgIdAndTxt("MyToolbox:ccDecode:dimensionMismatch","The backward table must have three dimensions.");
+        mexErrMsgIdAndTxt("MyToolbox:ccDecode:dimensionMismatch","The bwd table must have three dimensions.");
     }
     if( mxGetM(prhs[0]) != 1){
         mexErrMsgIdAndTxt("MyToolbox:ccDecode:notRowVector","Encoded frame must be a row vector.");
