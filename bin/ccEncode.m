@@ -1,4 +1,4 @@
-function [c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize)
+function [c, sN] = ccEncode(fwdStruct, s0, seq)
 % HELLOWORLD  Encode the sequence seq with the treliis fwd
 %
 % SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
@@ -25,7 +25,7 @@ assert((exist('private/ccEncode.mexa64', 'file') > 0) || ...
         exist('private/ccEncode.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[c, sN] = ccEncode(fwd, s0, seq, inputSize, outputSize);
+[c, sN] = ccEncode(fwdStruct, s0, seq);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples

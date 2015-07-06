@@ -6,7 +6,7 @@
 /**
  * Viterbi Decoder
  * 
- * @param *seqArray input encoded sequence
+ * @param *encodedFrame input encoded sequence
  * @param *bwdArray bwd with
  *          bwd[current_state][idx][0] = previous_state
  *          bwd[current_state][idx][1] = input uncoded/plain bit
@@ -17,30 +17,39 @@
  * @param *recodedBitsArray encoded sequence going with the decoded one (output)
  * 
  */
-void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, uint64_T initState, uint64_T finalState, mxArray **decodedFrameArray, mxArray **recodedFrameArray)
+void ccDecode(  mxArray *encodedFrame,
+                int initState,
+                int finalState,
+                mxArray *priorArray,
+                mxArray *bwdArray,
+                int stateSize,
+                int inputSize,
+                int outputSize,
+                mxArray **decodedFrameArray,
+                mxArray **recodedFrameArray
+            )
 {
     int max, maxmax, survoutput, survinput,survstate,old_state,mask,Mbit,i,i0,sdim,b,jj,d,x,t, state;
-    double path, **prior ;
-    
-    mwSize *dims;
-
-    dims = mxGetDimensions(bwdArray);
-
+    double M; /* Metric */
+   
     uint64_T *encodedFrame = (uint64_T*) mxGetData(encodedFrameArray);
-    uint64_T ***bwd = (uint64_T***) mxGetData(bwdArray);
-    
-    int stateSize = dims[0];    /* Number of possible states: */
-    int inputSize = dims[1];    /* Number of bits per symbol  */
+    uint64_T *bwd = (uint64_T*) mxGetData(bwdArray);
+    double *prior = (double*) mxGetData(priorArray);
     
     printf("\ninput: %d\nstate: %d\n", inputSize, stateSize);
-    int frameLength = (int) mxGetM(encodedFrameArray)/inputSize;  /* Number of unencoded input symbols per frame (ie: information bits) */
+    /**
+     * Number of unencoded input symbols per frame
+     * For example: inputSize = 2
+     *              encodedFrame = {1 2 0 3} = {01100011}
+     *              frameLength = 4 = 8/2
+     */
+    int frameLength = (int) mxGetM(encodedFrameArray);
 
-
-    double *path0 = calloc(stateSize, sizeof(double));
+    double M = calloc(stateSize, sizeof(double));
     double *path1 = calloc(stateSize, sizeof(double));
     uint64_T *decodedFrame  = calloc(frameLength,sizeof(uint64_T));
     uint64_T *recodedFrame  = calloc(frameLength,sizeof(uint64_T));
-    int ***trace_back = calloc(stateSize,sizeof(*trace_back));    
+    int ***trace_back = calloc(stateSize,sizeof(*trace_back)); 
     for (i = 0; i < stateSize; ++i)
     {
         trace_back[i] = calloc(frameLength, sizeof(*trace_back[i]));
@@ -54,33 +63,37 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, uint64_
      * 
      * All metrics are -infty exept the initial state
      */
-    for (state = 0 ; state < stateSize ; state++)
-        path0[state] = -INFINITY;
+    for (state = 0 ; state < stateSize ; state++) {
+        M[state] = -INFINITY;
+    }
+    M[init_state] = 0;
+
 
     /**
      * 2. ACS
      *
-     * For each information bit of the frame
+     * For each symbol of the frame
      *  For each possible state transition
-     *   For each possible parent state
+     *   For each possible symbol
      */
     for (t = frameLength-1 ; t >= 0 ; t--) {
         for (state = 0 ; state < stateSize ; state++) {
             max = -INFINITY;
-            for( b = 0 ; b < inputSize ; b++) {
+            i0 = t*outputSize;
+            for (b = 0 ; b < inputSize ; b++) {
                 x = bwd[state][b][2];
                 old_state = bwd[state][b][0];
-                path = path0[old_state];
-                for (d = 0 ; d < sdim ; d++) {
+                M_tmp = M[old_state];
+                for (d = 0 ; d < outputSize ; d++) {
                     i = i0 + d;
                     jj = (x >> d*Mbit)&mask;
-                    path += prior[i][jj];
+                    M_tmp += prior[i + jj*outputSize] /* P(i | jj) */
                 }
-                if(path>=max) {
+                if(M_path>=max) {
                     survinput  = bwd[state][b][1];
                     survoutput = x;
                     survstate  = old_state;
-                    max = path;
+                    max = M_tmp;
                 }
             }
             trace_back[state][t][0] = survstate;
@@ -92,11 +105,10 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, uint64_
                 maxmax = max;
         }
         for(state = 0 ; state < stateSize ; state++)
-            path0[state] = path1[state] - maxmax;
+            M[state] = path1[state] - maxmax;
     }
 
     /* Final trace back (with trellis termination) */
-/*
     state = finalState;
     for (t = frameLength-1 ; t >= 0 ; t--) {
         decodedFrame[t] = trace_back[state][t][1];
@@ -126,12 +138,15 @@ void ccDecode(const mxArray *encodedFrameArray, const mxArray *bwdArray, uint64_
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
 {
+    double *encodedFrame;
+    int initState, finalState;
+    
     /* check for proper number of arguments */
     if(nrhs!=4) {
         mexErrMsgIdAndTxt("MyToolbox:ccDecode:nrhs","Four inputs required.");
     }
     
-    /* make sure the first input argument is a string */
+    /* make sure the first input argument is a string 
     if( !mxIsClass(prhs[0], "uint64") ){
         mexErrMsgIdAndTxt("MyToolbox:ccDecode:notUint64","Encoded frame must be uint64.");
     }
@@ -150,26 +165,33 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
     if( mxGetM(prhs[0]) != 1){
         mexErrMsgIdAndTxt("MyToolbox:ccDecode:notRowVector","Encoded frame must be a row vector.");
-    }
+    }*/
     
-    /*mxArray *encodedFrame = prhs[0];*/
+    encodedFrame = mxGetPr(prhs[0]);
     
-    /*mxArray *bwd = prhs[1];*/
+    mxArray *bwd = prhs[1];
     
-    int initState = mxGetScalar(prhs[2]);
-    
-    int finalState = mxGetScalar(prhs[3]);
+    initState = (int) mxGetScalar(prhs[1]);
+    finalState = (int) mxGetScalar(prhs[2]);
     
     mxArray *decodedFrame;  
     mxArray *recodedFrame;
     
     printf("0");
-    ccDecode(prhs[0], prhs[1], initState, finalState, &decodedFrame, &recodedFrame);
+    ccDecode(encodedFrame,
+             initState,
+             finalState,
+             &bwd,
+             stateSize,
+             inputSize,
+             &decodedFrame, 
+             &recodedFrame
+            );
     printf("0");
     
     decodedFrame = mxCreateDoubleScalar(3);
     plhs[0] = decodedFrame;
-    plhs[1] = decodedFrame;
+    plhs[1] = recodedFrame;
     printf("FIN");
 }
 

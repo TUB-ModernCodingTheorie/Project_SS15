@@ -1,14 +1,23 @@
-function [treillis] = ccInitialize(A,B,C,D)
+function [forwardStruct, backwardStruct] = ccInitialize(A,B,C,D)
 % CCINITIALIZE  
 %
-% SYNOPSIS  [fwd, bwd] = ccInitialize(A,B,C,D,m,n,k)
+% SYNOPSIS  treillis = ccInitialize(A,B,C,D)
 %
-% INPUTS    fwd = forward Trellis matrix
-%           s0  = initial state
-%           seq = input sequence
+% INPUTS    A
+%           B
+%           C
+%           D
 %
-% OUTPUTS   c  = codewords
-%           sN = final state
+% OUTPUTS   forwardStruct = struct:
+%                               forward: array      
+%                               ldStates: int scalar = m
+%                               ldOutputs: int scalar = n
+%                               ldInputs: int scalar = k
+%           forwardStruct = struct:
+%                               backward: array      
+%                               ldStates: int scalar = m
+%                               ldOutputs: int scalar = n
+%                               ldInputs: int scalar = k
 %
 %
 % More detailed help is in the <a href="matlab: help helloWorld>extended_help">extended help</a>.
@@ -23,7 +32,7 @@ assert((exist('private/ccInitialize.mexa64', 'file') > 0) || ...
         exist('private/ccInitialize.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[treillis] = ccInitialize(A,B,C,D);
+[forwardStruct, backwardStruct] = ccInitialize(A,B,C,D);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples

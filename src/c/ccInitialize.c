@@ -37,7 +37,7 @@ void makeTrellis(double *A, double *B, double *C, double *D,
         for (inp = 0; inp < numberOfInputs ; inp++) {
             codeword = 0;
             nextState = 0;
-			
+            
             for(i = 0; i < m; i++) {
                 for(j = 0; j < m; j++) {
                     nextState ^= Bin2int(Int2bin(state, j)*(int)A[j + i*m], i);
@@ -47,30 +47,30 @@ void makeTrellis(double *A, double *B, double *C, double *D,
                 }
             }
             for(i = 0; i < n; i++) {
-                    for(j = 0; j < m; j++) {
+                for(j = 0; j < m; j++) {
                     codeword ^= Bin2int(Int2bin(state, j)*(int)C[j + i*m], i);
                 }
                 for(j = 0; j < k; j++) {
                     codeword ^= Bin2int(Int2bin(inp, j)*(int)D[j + i*k], i);
                 }
             }
-        
+            
             fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)] = codeword;
             fwdData[state + inp*numberOfStates + 0*(numberOfStates*numberOfInputs)] = nextState;
         }
     }
-	
-	for (nextState = 0; nextState < numberOfStates; nextState++) {
-		i = 0;
-		for (inp = 0; inp < numberOfInputs ; inp++) {
-			for (state = 0; state < numberOfStates; state++) {
-				if (nextState == fwdData[state + inp*numberOfStates]) {
-					bwdData[nextState + i*numberOfStates] = state;
-					bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfOutputs)] = fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)];
-				}
-			}
-		}
-	}
+    
+    for (nextState = 0; nextState < numberOfStates; nextState++) {
+        i = 0;
+        for (inp = 0; inp < numberOfInputs ; inp++) {
+            for (state = 0; state < numberOfStates; state++) {
+                if (nextState == fwdData[state + inp*numberOfStates]) {
+                    bwdData[nextState + i*numberOfStates] = state;
+                    bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfOutputs)] = fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)];
+                }
+            }
+        }
+    }
 }
 
 /* The gateway function */
@@ -79,7 +79,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 {
 
  /*   struct trellis_t trellisData;*/
-    const char *field_names[] = {"forward", "backward", "ldStates", "ldOutputs", "ldInputs"};
+    const char *field_names[] = {"trellis", "ldStates", "ldOutputs", "ldInputs"};
     mwSize structDims[2] = {1,1};
     int nbFields = (sizeof(field_names)/sizeof(*field_names));
     
@@ -112,21 +112,17 @@ void mexFunction( int nlhs, mxArray *plhs[],
     k = mxGetM(prhs[1]);
     
     makeTrellis(A, B, C, D, m, n, k, &fwdArray, &bwdArray);
-
-/*    trellis.forward = fwdArray;
-    trellis.backward = bwdArray;
-    trellis.ldStates = m;
-    trellis.ldOutputs = n;
-    trellis.ldInputs = k;*/
     
     plhs[0] = mxCreateStructArray(2, structDims, nbFields, field_names);
-    mxSetFieldByNumber(plhs[0],0,0,fwdArray);
-    mxSetFieldByNumber(plhs[0],0,1,bwdArray);
-    mxSetFieldByNumber(plhs[0],0,2,mxCreateDoubleScalar(m));
-    mxSetFieldByNumber(plhs[0],0,3,mxCreateDoubleScalar(n));
-    mxSetFieldByNumber(plhs[0],0,4,mxCreateDoubleScalar(k));
+    plhs[1] = mxCreateStructArray(2, structDims, nbFields, field_names);
     
-/*    plhs[0] = fwdArray;
-    plhs[1] = bwdArray;*/
+    mxSetFieldByNumber(plhs[0],0,0,fwdArray);                /* forward */
+    mxSetFieldByNumber(plhs[0],0,1,mxCreateDoubleScalar(m)); /* ldStates */
+    mxSetFieldByNumber(plhs[0],0,2,mxCreateDoubleScalar(n)); /* ldOutputs */
+    mxSetFieldByNumber(plhs[0],0,3,mxCreateDoubleScalar(k)); /* ldInputs */
     
+    mxSetFieldByNumber(plhs[1],0,0,bwdArray);                /* forward */
+    mxSetFieldByNumber(plhs[1],0,1,mxCreateDoubleScalar(m)); /* ldStates */
+    mxSetFieldByNumber(plhs[1],0,2,mxCreateDoubleScalar(n)); /* ldOutputs */
+    mxSetFieldByNumber(plhs[1],0,3,mxCreateDoubleScalar(k)); /* ldInputs */
 }

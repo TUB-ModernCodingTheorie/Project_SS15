@@ -1,4 +1,4 @@
-function [c, sN] = ccDecode(encodedFrame, bwd, initState, finalState)
+function [m, c] = ccDecode(encodedFrame, initState, finalState, treillis)
 % CCDECODE  Decode the frame encodedFrame with the trellis bwd
 %
 % SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
@@ -7,8 +7,8 @@ function [c, sN] = ccDecode(encodedFrame, bwd, initState, finalState)
 %           s0  = initial state
 %           seq = input sequence
 %
-% OUTPUTS   c  = codewords
-%           sN = final state
+% OUTPUTS   m  = decoded sequence
+%           c = corresponding coded sequence
 %
 %
 % More detailed help is in the <a href="matlab: help helloWorld>extended_help">extended help</a>.
@@ -23,7 +23,7 @@ assert((exist('private/ccDecode.mexa64', 'file') > 0) || ...
         exist('private/ccDecode.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[c, sN] = ccDecode(encodedFrame, bwd, initState, finalState);
+[m, c] = ccDecode(encodedFrame, initState, finalState, treillis);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples
