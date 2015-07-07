@@ -79,9 +79,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
 {
 
  /*   struct trellis_t trellisData;*/
+	const int nbFields = 4;
     const char *field_names[] = {"trellis", "ldStates", "ldOutputs", "ldInputs"};
     mwSize structDims[2] = {1,1};
-    int nbFields = (sizeof(field_names)/sizeof(*field_names));
     
     mxArray *fwdArray, *bwdArray;
     uint64_T *fwd, *bwd;

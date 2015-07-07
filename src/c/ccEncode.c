@@ -26,7 +26,7 @@ void ccEncode(mxArray *fwd, const mxArray *s0, const mxArray *seq, int inputSize
 {
     int i, j, rc = 0;
     uint64_T currState = 0;
-    uint64_T codeWord, inputSeq;
+    uint64_T codeWord;
     
     int stateSize = mxGetN(s0);
     int frameSize = mxGetN(seq);
@@ -37,7 +37,7 @@ void ccEncode(mxArray *fwd, const mxArray *s0, const mxArray *seq, int inputSize
     mwSize *fwdSize = mxGetDimensions(fwd);
     
     (*sN) = mxDuplicateArray(s0);
-    (*c) = mxCreateNumericMatrix(1, frameSize*outputSize, mxDOUBLE_CLASS, 0);
+    (*c) = mxCreateNumericMatrix(1, frameSize, mxDOUBLE_CLASS, 0);
     
     cData = mxGetPr(*c);
     uData = mxGetPr(seq);
@@ -48,14 +48,8 @@ void ccEncode(mxArray *fwd, const mxArray *s0, const mxArray *seq, int inputSize
         currState ^= Bin2int((int)s0_ptr[i],i);
 
     for(i=0; i < frameSize; i++) {
-        inputSeq = 0;
-        for(j=0; j<inputSize; j++)
-            inputSeq ^= Bin2int((int)uData[i*inputSize + j],j);
-        
-        BinEnc(&currState, &codeWord, inputSeq, fwdTrellis, fwdSize[0], fwdSize[1]);
-        
-        for(j=0; j < outputSize ; j++)
-            cData[i*outputSize + j] = Int2bin(codeWord,j);
+        BinEnc(&currState, &codeWord, (int)uData[i], fwdTrellis, fwdSize[0], fwdSize[1]);
+        cData[i] = codeWord;
     }
 }
 
