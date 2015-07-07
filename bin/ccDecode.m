@@ -1,4 +1,4 @@
-function [m, c] = ccDecode(encodedFrame, initState, finalState, treillis)
+function [m, c] = ccDecode(bwdTrellis, encodedFrame, Bmetric, initState, finalState)
 % CCDECODE  Decode the frame encodedFrame with the trellis bwd
 %
 % SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
@@ -23,7 +23,7 @@ assert((exist('private/ccDecode.mexa64', 'file') > 0) || ...
         exist('private/ccDecode.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[m, c] = ccDecode(encodedFrame, initState, finalState, treillis);
+[m, c] = ccDecode(bwdTrellis, encodedFrame, Bmetric, initState, finalState);
 
 function extended_help
 %EXTENDED_HELP Some additional technical details and examples

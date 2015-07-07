@@ -26,7 +26,7 @@ void makeTrellis(double *A, double *B, double *C, double *D,
     uint64_T numberOfInputs = 2 << (k-1);
     uint64_T numberOfOutputs = 2 << (n-1);
     const mwSize dimsFwd[3] = {numberOfStates, numberOfInputs, 2};
-    const mwSize dimsBwd[3] = {numberOfStates, numberOfOutputs, 2};
+    const mwSize dimsBwd[3] = {numberOfStates, numberOfInputs, 3};
     
     (*fwd) = mxCreateNumericArray(3, dimsFwd, mxUINT64_CLASS, 0);
     (*bwd) = mxCreateNumericArray(3, dimsBwd, mxUINT64_CLASS, 0);
@@ -66,7 +66,8 @@ void makeTrellis(double *A, double *B, double *C, double *D,
             for (state = 0; state < numberOfStates; state++) {
                 if (nextState == fwdData[state + inp*numberOfStates]) {
                     bwdData[nextState + i*numberOfStates] = state;
-                    bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfOutputs)] = fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)];
+					bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfInputs)] = inp;
+                    bwdData[nextState + i*numberOfStates + 2*(numberOfStates*numberOfInputs)] = fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)];
                 }
             }
         }
