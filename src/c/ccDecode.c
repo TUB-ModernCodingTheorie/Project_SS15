@@ -53,8 +53,6 @@ void ccDecode(  mxArray *encodedFrameArray,
 	double *path0 = mxCalloc(stateSize, sizeof(double));
 	double *path1 = mxCalloc(stateSize, sizeof(double));
 	
-	printf("%d\n",mxGetM(priorArray));
-	
 	if (path0 == NULL || path1 == NULL)
 		mexErrMsgIdAndTxt("CodingLibrary:ccDecode:noMemory","Could not allocate array. Not enough free memory.\n");
 	
@@ -103,7 +101,7 @@ void ccDecode(  mxArray *encodedFrameArray,
 				for(d=0;d<n;d++) {
                     i = i0 + d;
                     jj = (x >> d)&1;
-					printf("Prior: %f b: %d d: %d i: %d jj: %d\n",prior[i + jj*frameSize*n],b,d,i,jj);
+					//printf("Prior: %f i: %d jj: %d\n",prior[i + jj*frameSize*n],i+1,jj+1);
                     path += prior[i + jj*frameSize*n];
                 }
 				if(path>=max) {

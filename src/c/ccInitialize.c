@@ -68,6 +68,7 @@ void makeTrellis(double *A, double *B, double *C, double *D,
                     bwdData[nextState + i*numberOfStates] = state;
 					bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfInputs)] = inp;
                     bwdData[nextState + i*numberOfStates + 2*(numberOfStates*numberOfInputs)] = fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)];
+					i++;
                 }
             }
         }

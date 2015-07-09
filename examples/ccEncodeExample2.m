@@ -7,20 +7,38 @@ D = [1,1];
 
 [fwd, bwd] = ccInitialize(A,B,C,D);
 
-s0 = 1;
+s0 = 0;
 
-seq = [1,1];
+seq = round(rand(1,10000));
 
 [c, sN] = ccEncode(fwd,s0,seq);
 
-Bmetric = zeros(4,2);
-Bmetric(1,1) = 0;
-Bmetric(1,2) = 1;
-Bmetric(2,1) = 1;
-Bmetric(2,2) = 0;
-Bmetric(3,1) = 1;
-Bmetric(3,2) = 0;
-Bmetric(4,1) = 0;
-Bmetric(4,2) = 1;
+Bmetric = zeros(length(c)*2,2);
+for i = 0:length(c)-1
+    switch c(i+1)
+        case 0
+            Bmetric(i*2+1,1) = log(0.9);
+            Bmetric(i*2+1,2) = log(0.1);
+            Bmetric(i*2+2,1) = log(0.9);
+            Bmetric(i*2+2,2) = log(0.1);
+        case 1
+            Bmetric(i*2+1,1) = log(0.1);
+            Bmetric(i*2+1,2) = log(0.9);
+            Bmetric(i*2+2,1) = log(0.9);
+            Bmetric(i*2+2,2) = log(0.1);
+        case 2
+            Bmetric(i*2+1,1) = log(0.9);
+            Bmetric(i*2+1,2) = log(0.1);
+            Bmetric(i*2+2,1) = log(0.1);
+            Bmetric(i*2+2,2) = log(0.9);
+        case 3
+            Bmetric(i*2+1,1) = log(0.1);
+            Bmetric(i*2+1,2) = log(0.9);
+            Bmetric(i*2+2,1) = log(0.1);
+            Bmetric(i*2+2,2) = log(0.9);
+    end
+end
 
 [m , ch] = ccDecode(bwd,c,Bmetric,s0,sN);
+
+display(['Result: ',num2str(length(find(c ~= ch))==0)]);
