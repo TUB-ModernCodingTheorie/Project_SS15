@@ -3,7 +3,7 @@ function [forwardStruct, backwardStruct] = ccInitialize(A,B,C,D)
 %
 % SYNOPSIS  treillis = ccInitialize(A,B,C,D)
 %
-% INPUTS    A
+% INPUTS    A,
 %           B
 %           C
 %           D
