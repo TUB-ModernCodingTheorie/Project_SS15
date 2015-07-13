@@ -42,11 +42,19 @@ void makeTrellis(double *A, double *B, double *C, double *D,
     fwdData = (uint64_T*)mxGetData(*fwd);
     bwdData = (uint64_T*)mxGetData(*bwd);
     
+    /**
+     * For each state
+     *      For each bit of the input
+     */
     for (state = 0; state < numberOfStates; state++) {
         for (inp = 0; inp < numberOfInputs ; inp++) {
             codeword = 0;
             nextState = 0;
             
+            /**
+             * nextState = state*A + input*B
+             * ie: nextState[i] = sum_{j=0}^m(state[j]*A[j][i]) + sum_{j=0}^k(input[j]*B[j][i])
+             */
             for(i = 0; i < m; i++) {
                 for(j = 0; j < m; j++) {
                     nextState ^= Bin2int(Int2bin(state, j)*(int)A[j + i*m], i);
@@ -55,6 +63,10 @@ void makeTrellis(double *A, double *B, double *C, double *D,
                     nextState ^= Bin2int(Int2bin(inp, j)*(int)B[j + i*k], i);
                 }
             }
+            /**
+             * codeword = state*C + input*D
+             * ie: nextState[i] = sum_{j=0}^m(state[j]*C[j][i]) + sum_{j=0}^k(input[j]*D[j][i])
+             */
             for(i = 0; i < n; i++) {
                 for(j = 0; j < m; j++) {
                     codeword ^= Bin2int(Int2bin(state, j)*(int)C[j + i*m], i);
@@ -64,20 +76,33 @@ void makeTrellis(double *A, double *B, double *C, double *D,
                 }
             }
             
+            /**
+             * fwd[state][input][1] = codeword
+             * fwd[state][input][0] = nextState
+             */
             fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)] = codeword;
             fwdData[state + inp*numberOfStates + 0*(numberOfStates*numberOfInputs)] = nextState;
         }
     }
     
+    /**
+     * For each state,
+     *      For each input
+     *          if a state1 is the next state,
+     *              => set state as previousState on bwd[state1][i][0]
+     *              => set the corresponding input on bwd[state1][i][1]
+     *              => set the output (ie fwdData[state][input][1]) on bwd[state1][i][2]
+     * 
+     */
     for (nextState = 0; nextState < numberOfStates; nextState++) {
         i = 0;
         for (inp = 0; inp < numberOfInputs ; inp++) {
             for (state = 0; state < numberOfStates; state++) {
                 if (nextState == fwdData[state + inp*numberOfStates]) {
                     bwdData[nextState + i*numberOfStates] = state;
-					bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfInputs)] = inp;
+                    bwdData[nextState + i*numberOfStates + 1*(numberOfStates*numberOfInputs)] = inp;
                     bwdData[nextState + i*numberOfStates + 2*(numberOfStates*numberOfInputs)] = fwdData[state + inp*numberOfStates + 1*(numberOfStates*numberOfInputs)];
-					i++;
+                    i++;
                 }
             }
         }
