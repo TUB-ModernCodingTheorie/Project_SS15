@@ -87,6 +87,7 @@ void ccDecode(  const mxArray *bwdArray,
      * For each symbol of the frame
      *  For each possible state transition
      *   For each possible symbol
+     *      Find the best path and save it.
      */
     for (t = 0; t < frameSize; t++) {
         maxmax = -INFINITY;
@@ -94,6 +95,11 @@ void ccDecode(  const mxArray *bwdArray,
         for (s = 0 ; s < stateSize ; s++) {
             max = -INFINITY;
             for (b = 0 ; b < inputSize ; b++) {
+                /**
+                 * x = bwd[s][b][2]
+                 * old_s = bwd[s][b][0]
+                 * path = sum_{i=0}^{size(codeword)-1} metric[i, corresponding_outputbit]
+                 */
                 x     = bwd[s + b*stateSize + 2*stateSize*inputSize];
                 old_s = bwd[s + b*stateSize];
                 path  = path0[old_s];

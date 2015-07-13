@@ -43,8 +43,9 @@ void makeTrellis(double *A, double *B, double *C, double *D,
     bwdData = (uint64_T*)mxGetData(*bwd);
     
     /**
+     * FORWARD
      * For each state
-     *      For each bit of the input
+     *      For each possible input
      */
     for (state = 0; state < numberOfStates; state++) {
         for (inp = 0; inp < numberOfInputs ; inp++) {
@@ -86,8 +87,9 @@ void makeTrellis(double *A, double *B, double *C, double *D,
     }
     
     /**
+     * BACKWARD
      * For each state,
-     *      For each input
+     *      For each possible input
      *          if a state1 is the next state,
      *              => set state as previousState on bwd[state1][i][0]
      *              => set the corresponding input on bwd[state1][i][1]
