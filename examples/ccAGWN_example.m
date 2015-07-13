@@ -7,7 +7,7 @@ display = 0;
 SNR = 3; % in dB
 Eb = 1; % Bit energy
 
-[fwd bwd] = ccInitialize(A,B,C,D);
+[fwd, bwd] = ccInitialize(A,B,C,D);
 
 n = fwd.ldOutputs;
 k = fwd.ldInputs;
@@ -34,7 +34,7 @@ end
 %% 2BSK
 channelCode_str = reshape(dec2bin(c,n),1,[]);
 for i = 1:numel(channelCode_str)
-    channelCode(i) = str2num(channelCode_str(i));
+    channelCode(i) = str2double(channelCode_str(i));
 end
 
 channelCode_2BSK = Eb*(2*channelCode(:)'-1);
