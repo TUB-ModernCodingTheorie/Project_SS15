@@ -100,7 +100,7 @@ void ccDecode(  const mxArray *bwdArray,
                 /**
                  * x = bwd[s][b][2]
                  * old_s = bwd[s][b][0]
-                 * path = sum_{i=0}^{size(codeword)-1} metric[i, corresponding_outputbit]
+                 * path = old_s + sum_{i=0}^{size(codeword)-1} metric[i, corresponding_outputbit]
                  */
                 x     = bwd[s + b*stateSize + 2*stateSize*inputSize];
                 old_s = bwd[s + b*stateSize];
