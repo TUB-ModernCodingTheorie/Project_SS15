@@ -1,7 +1,6 @@
 clear all
 addpath('../bin');
 N = 1000;
-
 A = [0 1;0 0];
 B = [1 0];
 C = [0 1;1 1];
@@ -10,7 +9,6 @@ D = [1 1];
 display = 0;
 SNR = 10; % in dB
 Eb = 10^(SNR/10)/2; % Bit energy
-
 
 %   X     X_coded    X_coded_BPSK     Y       X_hat
 %  -->[enc]----->[BPSK]---->[Channel]--->[dec]-->
@@ -31,7 +29,7 @@ end
 
 %% Encoding
 s0 = 0;
-[c,sN] = ccEncode(fwd,X,s0);
+[X,sN] = ccEncode(fwd,X,s0);
 
 X_coded = zeros(1,length(c)*n);
 for i = 1:length(c)
