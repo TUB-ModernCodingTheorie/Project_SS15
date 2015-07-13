@@ -1,23 +1,44 @@
 path('../bin/',path);
 
-forwardTrellis = zeros(2,2,2);
+A = [0,1;0,0];
+B = [1,0];
+C = [0,1;1,1];
+D = [1,1];
 
-forwardTrellis(1,1,2) = 01; %s=0, u=0
-forwardTrellis(1,1,1) = 1;
+[fwd, bwd] = ccInitialize(A,B,C,D);
 
-forwardTrellis(1,2,2) = 11; %s=0, u=1
-forwardTrellis(1,2,1) = 1;
+s0 = 0;
 
-forwardTrellis(2,1,2) = 10; %s=1, u=0
-forwardTrellis(2,1,1) = 0;
+seq = round(rand(1,10000));
 
-forwardTrellis(2,2,2) = 00; %s=1, u=1
-forwardTrellis(2,2,1) = 0;
+[c, sN] = ccEncode(fwd,seq,s0);
 
-forward = struct('trellis', forwardTrellis,'ldStates',1,'ldOutputs',2,'ldInputs',1);
+Bmetric = zeros(length(c)*2,2);
+for i = 0:length(c)-1
+    switch c(i+1)
+        case 0
+            Bmetric(i*2+1,1) = log(0.9);
+            Bmetric(i*2+1,2) = log(0.1);
+            Bmetric(i*2+2,1) = log(0.9);
+            Bmetric(i*2+2,2) = log(0.1);
+        case 1
+            Bmetric(i*2+1,1) = log(0.1);
+            Bmetric(i*2+1,2) = log(0.9);
+            Bmetric(i*2+2,1) = log(0.9);
+            Bmetric(i*2+2,2) = log(0.1);
+        case 2
+            Bmetric(i*2+1,1) = log(0.9);
+            Bmetric(i*2+1,2) = log(0.1);
+            Bmetric(i*2+2,1) = log(0.1);
+            Bmetric(i*2+2,2) = log(0.9);
+        case 3
+            Bmetric(i*2+1,1) = log(0.1);
+            Bmetric(i*2+1,2) = log(0.9);
+            Bmetric(i*2+2,1) = log(0.1);
+            Bmetric(i*2+2,2) = log(0.9);
+    end
+end
 
-s0 = [1];
+[m , ch] = ccDecode(bwd,c,Bmetric,s0,sN);
 
-seq = [1,1,1,0];
-
-[c, sN] = ccEncode(forward,seq,s0);
+display(['Result: ',num2str(length(find(c ~= ch))==0)]);
