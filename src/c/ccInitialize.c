@@ -1,19 +1,5 @@
 #include "mex.h"
-
-/* This yields the i-th binary digit of an integer (LSB is in position i = 0)*/
-#define Int2bin(x_,i_) ((x_ >> i_)&1)
-
-/* This is just a way of computing efficiently a*2^i, where a in {0,1} */
-#define Bin2int(x_,i_) ((x_) << (i_))
-
-/*struct treillis_t
-{
-    int ldStates;
-    int ldOutputs;
-    int ldInputs;
-    mxArray **forward;
-    mxArray **backward;
-}*/
+#include "tools.h"
 
 void makeTrellis(double *A, double *B, double *C, double *D,
                  int m, int n, int k, mxArray **fwd, mxArray **bwd)
@@ -81,7 +67,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
 {
 
  /*   struct trellis_t trellisData;*/
-	const int nbFields = 4;
+    const int nbFields = 4;
     const char *field_names[] = {"trellis", "ldStates", "ldOutputs", "ldInputs"};
     mwSize structDims[2] = {1,1};
     
@@ -123,7 +109,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     mxSetFieldByNumber(plhs[0],0,2,mxCreateDoubleScalar(n)); /* ldOutputs */
     mxSetFieldByNumber(plhs[0],0,3,mxCreateDoubleScalar(k)); /* ldInputs */
     
-    mxSetFieldByNumber(plhs[1],0,0,bwdArray);                /* forward */
+    mxSetFieldByNumber(plhs[1],0,0,bwdArray);                /* backward */
     mxSetFieldByNumber(plhs[1],0,1,mxCreateDoubleScalar(m)); /* ldStates */
     mxSetFieldByNumber(plhs[1],0,2,mxCreateDoubleScalar(n)); /* ldOutputs */
     mxSetFieldByNumber(plhs[1],0,3,mxCreateDoubleScalar(k)); /* ldInputs */

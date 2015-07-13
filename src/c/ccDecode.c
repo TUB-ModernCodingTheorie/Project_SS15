@@ -4,9 +4,9 @@
 
 typedef struct
 {
-	void *next;
-	void *previous;
-	double *stateMetrics;
+    void *next;
+    void *previous;
+    double *stateMetrics;
 } stateMetrics_t;
 
 /**
