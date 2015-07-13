@@ -41,4 +41,5 @@ end
 
 [m , ch] = ccDecode(bwd,c,Bmetric,s0,sN);
 
-display(['Result: ',num2str(length(find(c ~= ch))/length(c)) '% of error']);
+display(['Result (recoded): ',num2str(length(find(c ~= ch))/length(c)) '% of error']);
+display(['Result (message): ',num2str(length(find(m ~= seq))/length(m)) '% of error']);
