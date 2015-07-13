@@ -1,6 +1,6 @@
 clear all
 addpath('../bin');
-N = 1000;
+N = 5;
 
 A = [0 1;0 0];
 B = [1 0];
@@ -8,8 +8,9 @@ C = [0 1;1 1];
 D = [1 1];
 
 display = 0;
-SNR = 10; % in dB
-Eb = 10^(SNR/10)/2; % Bit energy
+SNR = 3; % in dB
+SNR = 10*log10(2*Eb);
+Eb = 10000; % Bit energy
 
 
 %   X     X_coded    X_coded_BPSK     Y       X_hat

@@ -26,7 +26,7 @@ typedef struct
  * @param **recodedBitsArray encoded sequence going with the decoded one (output)
  */
 void ccDecode(  const mxArray *bwdArray,
-                const mxArray *encodedFrameArray,
+                const int frameSize,
                 const mxArray *metricArray,
                 const uint64_T initState,
                 const uint64_T finalState,                
@@ -37,7 +37,6 @@ void ccDecode(  const mxArray *bwdArray,
                 mxArray **recodedFrameArray
             )
 {
-    int frameSize = (int) mxGetN(encodedFrameArray);
     int stateSize = 1 << m;
     int outputSize = 1 << n;
     int inputSize = 1 << k;
@@ -45,8 +44,7 @@ void ccDecode(  const mxArray *bwdArray,
     int t,d,i0,i;
     uint64_T s,b,x,old_s,jj,survinput,survoutput,survstate;
     double path,max,maxmax;
-    
-    double *encodedFrame = mxGetPr(encodedFrameArray);
+  
     double *metric = mxGetPr(metricArray);
     double *decodedFrame,*recodedFrame;
 
@@ -86,17 +84,12 @@ void ccDecode(  const mxArray *bwdArray,
      *
      * For each symbol of the frame
      *  For each possible state transition
-<<<<<<< HEAD
      *   For each possible output symbol
 	 *     calculate path metric
 	 *     if max
 	 *       remember path
 	 *   if maxmax
 	 *     save path
-=======
-     *   For each possible symbol
-     *      Find the best path and save it.
->>>>>>> origin/master
      */
     for (t = 0; t < frameSize; t++) {
         maxmax = -INFINITY;
@@ -210,9 +203,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("CodingLibrary:ccDecode:notStruct",
                           "1st argument (backward structure) must be a structure with 4 fields");
     }
-    if (mxGetM(prhs[1]) != 1) {
-        mexErrMsgIdAndTxt("CodingLibrary:ccDescode:notRowVector",
-                          "2rd argument (encoded frame) must be a row vector.");
+    if (!mxIsScalar(prhs[1])) {
+        mexErrMsgIdAndTxt("CodingLibrary:ccDecode:notScalar",
+                          "2nd argument (frame size) must be a scalar.");
     }
     
     /**
@@ -226,7 +219,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     initState = (uint64_T) mxGetScalar(prhs[3]);
     finalState = (uint64_T) mxGetScalar(prhs[4]);
     
-    ccDecode(bwd, prhs[1], prhs[2], initState, finalState, m, k, n,
+    ccDecode(bwd, (int) mxGetScalar(prhs[1]), prhs[2], initState, finalState, m, k, n,
              &decodedFrame, &recodedFrame);
     
     /**
