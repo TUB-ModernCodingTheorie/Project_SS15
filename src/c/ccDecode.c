@@ -60,11 +60,11 @@ void ccDecode(  const mxArray *bwdArray,
     double *path1 = mxCalloc(stateSize, sizeof(double));
     
     if (path0 == NULL || path1 == NULL)
-            mexErrMsgIdAndTxt("CodingLibrary:ccDecode:noMemory",
-                              "Could not allocate array. Not enough free memory.");
+        mexErrMsgIdAndTxt("CodingLibrary:ccDecode:noMemory",
+                          "Could not allocate array. Not enough free memory.");
     if (traceBack == NULL)
-            mexErrMsgIdAndTxt("CodingLibrary:ccDecode:noMemory",
-                              "Could not allocate array. Not enough free memory.");
+        mexErrMsgIdAndTxt("CodingLibrary:ccDecode:noMemory",
+                          "Could not allocate array. Not enough free memory.");
     
     (*decodedFrameArray) = mxCreateNumericMatrix(1, frameSize, mxDOUBLE_CLASS, 0);
     (*recodedFrameArray) = mxCreateNumericMatrix(1, frameSize, mxDOUBLE_CLASS, 0);
