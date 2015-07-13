@@ -16,22 +16,22 @@ seq = round(rand(1,10000));
 Bmetric = zeros(length(c)*2,2);
 for i = 0:length(c)-1
     switch c(i+1)
-        case 0
+        case 0 %00
             Bmetric(i*2+1,1) = log(0.9);
             Bmetric(i*2+1,2) = log(0.1);
             Bmetric(i*2+2,1) = log(0.9);
             Bmetric(i*2+2,2) = log(0.1);
-        case 1
+        case 1 %10
             Bmetric(i*2+1,1) = log(0.1);
             Bmetric(i*2+1,2) = log(0.9);
             Bmetric(i*2+2,1) = log(0.9);
             Bmetric(i*2+2,2) = log(0.1);
-        case 2
+        case 2 %01
             Bmetric(i*2+1,1) = log(0.9);
             Bmetric(i*2+1,2) = log(0.1);
             Bmetric(i*2+2,1) = log(0.1);
             Bmetric(i*2+2,2) = log(0.9);
-        case 3
+        case 3 %11
             Bmetric(i*2+1,1) = log(0.1);
             Bmetric(i*2+1,2) = log(0.9);
             Bmetric(i*2+2,1) = log(0.1);

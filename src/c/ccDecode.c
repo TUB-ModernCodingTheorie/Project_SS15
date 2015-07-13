@@ -86,7 +86,12 @@ void ccDecode(  const mxArray *bwdArray,
      *
      * For each symbol of the frame
      *  For each possible state transition
-     *   For each possible symbol
+     *   For each possible output symbol
+	 *     calculate path metric
+	 *     if max
+	 *       remember path
+	 *   if maxmax
+	 *     save path
      */
     for (t = 0; t < frameSize; t++) {
         maxmax = -INFINITY;
@@ -97,11 +102,18 @@ void ccDecode(  const mxArray *bwdArray,
                 x     = bwd[s + b*stateSize + 2*stateSize*inputSize];
                 old_s = bwd[s + b*stateSize];
                 path  = path0[old_s];
+				
+				/**
+				 * Step through all output bits and calculate path metric
+				 */
                 for (d = 0 ; d < n ; d++) {
                     i = i0 + d;
                     jj = (x >> d)&1;
                     path += metric[i + jj*frameSize*n];
                 }
+				/**
+				 * Remember path till another path with higher metric is found
+				 */
                 if (path >= max) {
                    survinput  = bwd[s + b*stateSize + 1*stateSize*inputSize];
                    survoutput = x;
@@ -109,6 +121,9 @@ void ccDecode(  const mxArray *bwdArray,
                    max = path;
                 }
             }
+			/**
+			 * Save path
+			 */
             traceBack[s + t*stateSize] = survstate;
             traceBack[s + t*stateSize + 1*stateSize*frameSize] = survinput;
             traceBack[s + t*stateSize + 2*stateSize*frameSize] = survoutput;
@@ -116,6 +131,9 @@ void ccDecode(  const mxArray *bwdArray,
             if (max >= maxmax)
                 maxmax = max;
         }
+		/**
+		 * Subtract old path metric to avoid overflows
+		 */
         for (s = 0 ; s < stateSize ; s++)
             path0[s] = path1[s] - maxmax;
     }
