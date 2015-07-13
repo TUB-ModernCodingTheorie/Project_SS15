@@ -1,34 +1,22 @@
-function [m, c] = ccDecode(bwdTrellis, encodedFrame, Bmetric, initState, finalState)
+function [m, c] = ccDecode(bwdStruct, encodedFrame, metric, initState, finalState)
 % CCDECODE  Decode the frame encodedFrame with the trellis bwd
 %
-% SYNOPSIS  [c, sN] = ccEncode(fwd, s0, seq)
-%
-% INPUTS    fwd = forward Trellis matrix
-%           s0  = initial state
-%           seq = input sequence
-%
-% OUTPUTS   m  = decoded sequence
-%           c = corresponding coded sequence
+% SYNOPSIS  [m, c] = ccDecode(bwdTrellis, encodedFrame, metric, initState, finalState)
 %
 %
-% More detailed help is in the <a href="matlab: help helloWorld>extended_help">extended help</a>.
+% INPUTS    fwdStructs = (struct) backward Trellis structure
+%           encodedFrame = (row-vector) frame to decode
+%           metric  = (matrix) codewords metric
+%           initState = (scalar) initial state for decoding
+%           finalState = (scalar) final state for decoding
+%
+% OUTPUTS   m = (row-vector) decoded sequence
+%           c  = (row-vector) codewords
 
-
-% assert(isa(fwd,'double'), '1st argument should be of type double');
-% assert(isa(s0,'double'), '2nd argument should be of type double');
-% assert(isa(seq,'double'), '3rd argument should be of type double');
 assert((exist('private/ccDecode.mexa64', 'file') > 0) || ...    
         (exist('private/ccDecode.mexw64', 'file') > 0) || ... 
         (exist('private/ccDecode.mexw32', 'file') > 0) || ... 
         exist('private/ccDecode.mexa32', 'file') > 0, ...
       'Put or compile the executable file in the private folder.');
 
-[m, c] = ccDecode(bwdTrellis, encodedFrame, Bmetric, initState, finalState);
-
-function extended_help
-%EXTENDED_HELP Some additional technical details and examples
-%
-% Here is where you would put additional examples, technical discussions,
-% documentation on obscure features and options, and so on.
-
-error('This is a placeholder function just for helptext');
+[m, c] = ccDecode(bwdStruct, encodedFrame, metric, initState, finalState);

@@ -1,6 +1,6 @@
 path('../bin/',path);
 
-forwardTrellis = uint64(zeros(2,2,2));
+forwardTrellis = zeros(2,2,2);
 
 forwardTrellis(1,1,2) = 01; %s=0, u=0
 forwardTrellis(1,1,1) = 1;
@@ -14,8 +14,10 @@ forwardTrellis(2,1,1) = 0;
 forwardTrellis(2,2,2) = 00; %s=1, u=1
 forwardTrellis(2,2,1) = 0;
 
+forward = struct('trellis', forwardTrellis,'ldStates',1,'ldOutputs',2,'ldInputs',1);
+
 s0 = [1];
 
 seq = [1,1,1,0];
 
-[c, sN] = ccEncode(forwardTrellis,s0,seq,1,2);
+[c, sN] = ccEncode(forward,seq,s0);

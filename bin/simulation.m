@@ -38,14 +38,6 @@ channelCodeNoise = awgn(channelCode,SNR);
 disp(channelCodeNoise)
 
 
-
-
-
-
-
-
-
-
 end
 
 function    b=de2bi(d,K)

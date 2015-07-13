@@ -11,7 +11,7 @@ s0 = 0;
 
 seq = round(rand(1,10000));
 
-[c, sN] = ccEncode(fwd,s0,seq);
+[c, sN] = ccEncode(fwd,seq,s0);
 
 Bmetric = zeros(length(c)*2,2);
 for i = 0:length(c)-1
