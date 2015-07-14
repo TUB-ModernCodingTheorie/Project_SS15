@@ -33,7 +33,7 @@ end
 s0 = 0;
 [c,sN] = ccEncode(fwd,X,s0);
 
-%{
+
 X_coded = zeros(1,length(c)*n);
 for i = 1:length(c)
     switch c(i)
@@ -51,13 +51,13 @@ for i = 1:length(c)
             X_coded((i-1)*n+2) = 1;
     end    
 end
-%}
 
-c_str = reshape(fliplr(dec2bin(c)),1,[]);
-X_coded = zeros(1,length(c_str)*n);
-for i = 1:numel(c_str)
-    X_coded(i) = str2double(c_str(i));
-end
+
+% c_str = reshape(fliplr(dec2bin(c)),1,[]);
+% X_coded = zeros(1,length(c_str)*n);
+% for i = 1:numel(c_str)
+%     X_coded(i) = str2double(c_str(i));
+% end
 
 if display
     disp('output code:')
@@ -84,8 +84,8 @@ end
 
 %% define metric matrix
 metric = zeros(length(Y),2);
-metric(:,1) = abs(Y(:) - sqrt(Eb)*(1 - 2*1)).^2;
-metric(:,2) = abs(Y(:) - sqrt(Eb)*(1 - 2*0)).^2;
+metric(:,1) = abs(Y - sqrt(Eb)*(1 - 2*1)).^2;
+metric(:,2) = abs(Y - sqrt(Eb)*(1 - 2*0)).^2;
 
 %% Decode
 [X_hat, Y_hat] = ccDecode(bwd, length(c), metric, s0, sN);
