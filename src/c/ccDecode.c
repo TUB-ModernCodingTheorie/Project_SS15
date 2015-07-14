@@ -16,7 +16,7 @@ typedef struct
  *          bwd[current_state][output][0] = previous_state
  *          bwd[current_state][output][1] = input uncoded/plain
  *          bwd[current_state][output][2] = output
- * @param *encodedFrame input encoded sequence
+ * @param frameSize size of the frame
  * @param initState state at which we begin
  * @param finalState state in which we are supposed to finish with
  * @param m number of bits per state
@@ -74,7 +74,7 @@ void ccDecode(  const mxArray *bwdArray,
      * 
      * All metrics are -infty exept the initial state
      */
-		
+    
     for (s = 0 ; s < stateSize ; s++)
         path0[s] = -INFINITY;
     path0[initState] = 0;
@@ -85,11 +85,11 @@ void ccDecode(  const mxArray *bwdArray,
      * For each symbol of the frame
      *  For each possible state transition
      *   For each possible output symbol
-	 *     calculate path metric
-	 *     if max
-	 *       remember path
-	 *   if maxmax
-	 *     save path
+     *     calculate path metric
+     *     if max
+     *       remember path
+     *   if maxmax
+     *     save path
      */
     for (t = 0; t < frameSize; t++) {
         maxmax = -INFINITY;
@@ -106,7 +106,7 @@ void ccDecode(  const mxArray *bwdArray,
                 old_s = bwd[s + b*stateSize];
                 path  = path0[old_s];
                 
-                 /**
+                /**
                  * Step through all output bits and calculate path metric
                  */
                 for (d = 0 ; d < n ; d++) {
@@ -165,7 +165,7 @@ void ccDecode(  const mxArray *bwdArray,
 
 /**
  * The gateway function
- * [m, c] = ccDecode(bwdTrellis, encodedFrame, metric, initState, finalState)
+ * [m, c] = ccDecode(bwdTrellis, frameSize, metric, initState, finalState)
  **/
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
