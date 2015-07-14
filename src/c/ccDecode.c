@@ -24,7 +24,7 @@ typedef struct
  * @param n number of bits of the output symbols
  * @param **decodedSeqArray decoded sequence (output)
  * @param **recodedBitsArray encoded sequence going with the decoded one (output)
- */
+ **/
 void ccDecode(  const mxArray *bwdArray,
                 const int frameSize,
                 const mxArray *metricArray,
@@ -152,7 +152,7 @@ void ccDecode(  const mxArray *bwdArray,
     }
     
     if (s != initState) {
-	mexErrMsgIdAndTxt("CodingLibrary:ccDecode:decodingError","Decoding error! The initial state doesn't match the traced back state.\n");
+        mexErrMsgIdAndTxt("CodingLibrary:ccDecode:decodingError","Decoding error! The initial state doesn't match the traced back state.\n");
     }
 
     /**
@@ -166,7 +166,7 @@ void ccDecode(  const mxArray *bwdArray,
 /**
  * The gateway function
  * [m, c] = ccDecode(bwdTrellis, encodedFrame, metric, initState, finalState)
-**/
+ **/
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
 {

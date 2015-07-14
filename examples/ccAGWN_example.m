@@ -1,6 +1,8 @@
 clear all
 addpath('../bin');
+
 N = 1000;
+
 A = [0 1;0 0];
 B = [1 0];
 C = [0 1;1 1];
@@ -29,8 +31,9 @@ end
 
 %% Encoding
 s0 = 0;
-[X,sN] = ccEncode(fwd,X,s0);
+[c,sN] = ccEncode(fwd,X,s0);
 
+%{
 X_coded = zeros(1,length(c)*n);
 for i = 1:length(c)
     switch c(i)
@@ -46,7 +49,14 @@ for i = 1:length(c)
         case 3
             X_coded((i-1)*n+1) = 1;
             X_coded((i-1)*n+2) = 1;
-    end
+    end    
+end
+%}
+
+c_str = reshape(fliplr(dec2bin(c)),1,[]);
+X_coded = zeros(1,length(c_str)*n);
+for i = 1:numel(c_str)
+    X_coded(i) = str2double(c_str(i));
 end
 
 if display
@@ -83,4 +93,4 @@ end
 [X_hat, Y_hat] = ccDecode(bwd, length(c), metric, s0, sN);
 
 disp(['BER = ' num2str(sum(Y_hat~=c)/length(Y_hat))]);
-disp(['BER = ' num2str(X_hat~=X)]);
+disp(['BER = ' num2str(sum(X_hat~=X)/length(X_hat))]);
