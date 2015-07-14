@@ -94,9 +94,8 @@ for idx = 1:numel(SNR_tab)
     BER_tab(idx) = sum(X_hat ~= X)/length(X_hat);
 end
 
-semilogy(SNR_tab,BER_tab,'LineWidth',2);
+semilogy(SNR_tab,BER_tab,'LineWI);
 grid on
 xlabel('SNR (dB)');
 ylabel('BER');
-ylim([1e-5 1e0]);
 title('Transmission over AWGN Channel')
