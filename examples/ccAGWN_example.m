@@ -67,7 +67,7 @@ if display
 end
 
 %% 2BSK
-X_BPSK = sqrt(Eb)*(1 - 2*X_coded);
+X_BPSK = sqrt(Eb)*(1 - 2*X_coded); % -sqrt(Eb) <=> 1 ; +sqrt(Eb) <=> 0
 
 if display
     disp('code after channel coding(BPSK):');
@@ -84,10 +84,8 @@ end
 
 %% define metric matrix
 metric = zeros(length(Y),2);
-for i = 1:length(Y)
-    metric(i,1) = abs(Y(i) - sqrt(Eb)*(1 - 2*1))^2;
-    metric(i,2) = abs(Y(i) - sqrt(Eb)*(1 - 2*0))^2;
-end
+metric(:,1) = abs(Y(:) - sqrt(Eb)*(1 - 2*1)).^2;
+metric(:,2) = abs(Y(:) - sqrt(Eb)*(1 - 2*0)).^2;
 
 %% Decode
 [X_hat, Y_hat] = ccDecode(bwd, length(c), metric, s0, sN);

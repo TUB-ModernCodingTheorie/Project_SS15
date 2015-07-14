@@ -6,9 +6,9 @@ outputPath = '../bin/private/';
 % compilation of all c-files
 srcFiles = dir(inputPath);
 
-for i = 3:length(srcFiles)
+for i = 1:length(srcFiles)
     if ~isempty(regexp(srcFiles(i).name,'\w*(\.c)$','once'))
-        display(['Compiling ', srcFiles(i).name]);
+        disp(['Compiling ', srcFiles(i).name]);
         mex([inputPath srcFiles(i).name],'-outdir',outputPath);
     end
 end
