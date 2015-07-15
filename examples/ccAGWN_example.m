@@ -84,8 +84,8 @@ for idx = 1:numel(SNR_tab)
 
     %% define metric matrix
     metric = zeros(length(Y),2);
-    metric(:,1) = abs(Y - sqrt(Eb)*(1 - 2*1)).^2;
-    metric(:,2) = abs(Y - sqrt(Eb)*(1 - 2*0)).^2;
+    metric(:,2) = -abs(Y - sqrt(Eb)*(1 - 2*1)).^2;
+    metric(:,1) = -abs(Y - sqrt(Eb)*(1 - 2*0)).^2;
 
     %% Decode
     tic
