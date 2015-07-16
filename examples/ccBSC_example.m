@@ -1,7 +1,7 @@
 clear all
 path('../bin/',path);
 
-p = 0.3
+p = 0.2
 
 A = [0,1;0,0];
 B = [1,0];
@@ -12,35 +12,33 @@ D = [1,1];
 
 s0 = 0;
 
-seq = round(rand(1,10000));
+N = 10000;
+
+seq = round(rand(1,N));
 
 [c, sN] = ccEncode(fwd,seq,s0);
 
+%% BSC
+randomNoise = rand(1,N*2);
+channel = zeros(1,N*2);
+
+channel(randomNoise < p) = 1;
+
 c_b = reshape(de2bi(c)',1,[]);
+tmp = c_b;
+
+c_b(randomNoise < p & tmp == 1) = 0;
+c_b(randomNoise < p & tmp == 0) = 1;
 %% Channel
-Bmetric = zeros(length(c)*2,2);
-for i = 0:length(c)-1
-    switch c(i+1)
-        case 0 %00
-            Bmetric(i*2+1,1) = log(1-p);
-            Bmetric(i*2+1,2) = log(p);
-            Bmetric(i*2+2,1) = log(1-p);
-            Bmetric(i*2+2,2) = log(p);
-        case 1 %10
-            Bmetric(i*2+1,1) = log(p);
-            Bmetric(i*2+1,2) = log(1-p);
-            Bmetric(i*2+2,1) = log(1-p);
-            Bmetric(i*2+2,2) = log(p);
-        case 2 %01
-            Bmetric(i*2+1,1) = log(1-p);
-            Bmetric(i*2+1,2) = log(p);
-            Bmetric(i*2+2,1) = log(p);
-            Bmetric(i*2+2,2) = log(1-p);
-        case 3 %11
-            Bmetric(i*2+1,1) = log(p);
-            Bmetric(i*2+1,2) = log(1-p);
-            Bmetric(i*2+2,1) = log(p);
-            Bmetric(i*2+2,2) = log(1-p);
+Bmetric = zeros(length(c_b),2);
+
+for i = 1:length(c_b)
+    if c_b(i) == 1
+        Bmetric(i,1) = log(p);
+        Bmetric(i,2) = log(1-p);
+    else
+        Bmetric(i,1) = log(1-p);
+        Bmetric(i,2) = log(p);
     end
 end
 %% Decode
