@@ -37,26 +37,6 @@ for idx = 1:numel(SNR_tab)
     s0 = 0;
     [c,sN] = ccEncode(fwd,X,s0);
 
-    %{
-    X_coded = zeros(1,length(c)*n);
-    for i = 1:length(c)
-        switch c(i)
-            case 0
-                X_coded((i-1)*n+1) = 0;
-                X_coded((i-1)*n+2) = 0;
-            case 1
-                X_coded((i-1)*n+1) = 1;
-                X_coded((i-1)*n+2) = 0;
-            case 2
-                X_coded((i-1)*n+1) = 0;
-                X_coded((i-1)*n+2) = 1;
-            case 3
-                X_coded((i-1)*n+1) = 1;
-                X_coded((i-1)*n+2) = 1;
-        end    
-    end
-    %}
-
     X_coded = reshape(de2bi(c)',1,[]);
 
     if display
